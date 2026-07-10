@@ -1,0 +1,18 @@
+{
+  "name": "@job-pilot/database",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "src/index.ts",
+  "scripts": {
+    "build": "prisma generate && tsc -p tsconfig.json",
+    "lint": "eslint \"src/**/*.ts\"",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "prisma generate && vitest run"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.16.0",
+    "prisma": "^5.16.0",
+    "zod": "^3.22.0"
+  }
+}
