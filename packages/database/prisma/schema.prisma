@@ -12,3 +12,137 @@ model HealthCheck {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model User {
+  id               String            @id @default(uuid())
+  email            String            @unique
+  name             String
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  deletedAt        DateTime?
+  candidateProfile CandidateProfile?
+
+  @@index([email])
+}
+
+model CandidateProfile {
+  id                      String           @id @default(uuid())
+  userId                  String           @unique
+  headline                String?
+  summary                 String?
+  currentLocation         String?
+  countryCode             String?
+  timezone                String?
+  englishLevel            EnglishLevel?
+  yearsOfExperience       Int?
+  desiredRole             String?
+  desiredSalaryMin        Decimal?
+  desiredSalaryMax        Decimal?
+  desiredSalaryCurrency   String?
+  remoteOnly              Boolean          @default(true)
+  openToContract          Boolean          @default(true)
+  openToFullTime          Boolean          @default(true)
+  requiresVisaSponsorship Boolean          @default(false)
+  linkedinUrl             String?
+  githubUrl               String?
+  portfolioUrl            String?
+  createdAt               DateTime         @default(now())
+  updatedAt               DateTime         @updatedAt
+  deletedAt               DateTime?
+  user                    User             @relation(fields: [userId], references: [id])
+  experiences             Experience[]
+  candidateSkills         CandidateSkill[]
+
+  @@index([userId])
+}
+
+model Experience {
+  id                 String             @id @default(uuid())
+  candidateProfileId String
+  companyName        String
+  roleTitle          String
+  employmentType     EmploymentType?
+  location           String?
+  remote             Boolean            @default(false)
+  startDate          DateTime           @db.Date
+  endDate            DateTime?          @db.Date
+  current            Boolean            @default(false)
+  description        String?
+  achievements       String[]           @default([])
+  technologies       String[]           @default([])
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  deletedAt          DateTime?
+  candidateProfile   CandidateProfile   @relation(fields: [candidateProfileId], references: [id])
+
+  @@index([candidateProfileId])
+}
+
+model Skill {
+  id               String           @id @default(uuid())
+  name             String
+  normalizedName   String           @unique
+  category         SkillCategory?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  candidateSkills  CandidateSkill[]
+
+  @@index([normalizedName])
+}
+
+model CandidateSkill {
+  id                  String            @id @default(uuid())
+  candidateProfileId  String
+  skillId             String
+  proficiencyLevel    ProficiencyLevel?
+  yearsOfExperience   Decimal?
+  lastUsedYear        Int?
+  isPrimary           Boolean           @default(false)
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  candidateProfile    CandidateProfile  @relation(fields: [candidateProfileId], references: [id])
+  skill               Skill             @relation(fields: [skillId], references: [id])
+
+  @@unique([candidateProfileId, skillId])
+  @@index([candidateProfileId])
+  @@index([skillId])
+}
+
+enum EnglishLevel {
+  BEGINNER
+  ELEMENTARY
+  INTERMEDIATE
+  UPPER_INTERMEDIATE
+  ADVANCED
+  FLUENT
+  NATIVE
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  FREELANCE
+  INTERNSHIP
+  OTHER
+}
+
+enum SkillCategory {
+  LANGUAGE
+  FRAMEWORK
+  DATABASE
+  CLOUD
+  DEVOPS
+  TOOL
+  ERP
+  BUSINESS
+  SOFT_SKILL
+  OTHER
+}
+
+enum ProficiencyLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}

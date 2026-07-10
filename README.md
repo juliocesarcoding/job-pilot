@@ -42,6 +42,42 @@ Prerequisites:
 - `pnpm test`
 - `pnpm format`
 
+## Database
+
+Run database commands from the repository root:
+
+```bash
+pnpm --filter @job-pilot/database db:generate
+pnpm --filter @job-pilot/database db:migrate
+pnpm --filter @job-pilot/database db:seed
+```
+
+Phase 1A migration:
+
+- `20260710200926_phase_1a_candidate_profile_foundation`
+
+The seed creates or resets a deterministic local development user and empty candidate profile:
+
+- name: `Julio Cesar`
+- email: `julio.dev@jobpilot.local`
+
+Rerunning the seed clears this profile's fields, deletes this profile's experiences, and deletes this profile's candidate-skill relationships. It does not delete global `Skill` records.
+
+Until authentication is implemented, the API resolves the current user by `JOBPILOT_DEV_USER_EMAIL`. This is a temporary development mechanism and must be replaced by real authentication later.
+
+## Candidate Profile API
+
+The API listens on `http://localhost:3001` by default. Candidate profile routes are scoped to the configured development user:
+
+- `GET /api/candidate-profile`
+- `PUT /api/candidate-profile`
+- `POST /api/candidate-profile/experiences`
+- `PUT /api/candidate-profile/experiences/:experienceId`
+- `DELETE /api/candidate-profile/experiences/:experienceId`
+- `POST /api/candidate-profile/skills`
+- `PUT /api/candidate-profile/skills/:candidateSkillId`
+- `DELETE /api/candidate-profile/skills/:candidateSkillId`
+
 ## Running individual services
 
 Run these commands from the repository root:
@@ -66,4 +102,4 @@ The web app listens on `http://localhost:3000` by default and exposes `GET /api/
 
 ## Notes
 
-Phase 0 intentionally focuses on infrastructure, developer experience, and health checks. Candidate profiles, job collection, and AI features are not implemented yet.
+Phase 1A implements the candidate profile foundation only. Frontend profile screens, authentication, resume upload, AI, jobs, job matching, and application automation are not implemented yet.

@@ -1,4 +1,7 @@
 import { PrismaClient } from '@prisma/client';
+import { loadDatabaseEnv } from './env';
+
+loadDatabaseEnv();
 
 export const prisma = new PrismaClient();
 

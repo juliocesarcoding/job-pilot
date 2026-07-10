@@ -39,6 +39,7 @@ const apiEnvSchema = z.object({
     .default(3001),
   DATABASE_URL: urlWithProtocol('DATABASE_URL', ['postgresql://', 'postgres://']),
   REDIS_URL: urlWithProtocol('REDIS_URL', ['redis://', 'rediss://']),
+  JOBPILOT_DEV_USER_EMAIL: z.string().email().default('julio.dev@jobpilot.local'),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
 });
 

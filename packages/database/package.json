@@ -6,13 +6,23 @@
   "types": "src/index.ts",
   "scripts": {
     "build": "prisma generate && tsc -p tsconfig.json",
+    "db:generate": "tsx prisma/run-prisma.ts generate",
+    "db:migrate": "tsx prisma/run-prisma.ts migrate dev",
+    "db:seed": "tsx prisma/run-prisma.ts db seed",
     "lint": "eslint \"src/**/*.ts\"",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "prisma generate && vitest run"
   },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "dependencies": {
     "@prisma/client": "^5.16.0",
+    "dotenv": "^16.2.0",
     "prisma": "^5.16.0",
     "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.3"
   }
 }
