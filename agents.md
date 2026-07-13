@@ -19,6 +19,7 @@ The system must save the user's time and avoid low-quality or clearly incompatib
 - `packages/job-sources`: Job source adapters and normalization.
 - `docs`: Architecture, product decisions and development plans.
 - `infra`: Local and deployment infrastructure.
+- `postman`: Official API collections and environments used for manual and smoke testing.
 
 Before making architectural changes, read the relevant documents under `docs`.
 
@@ -127,6 +128,25 @@ Do not use npm or yarn.
 - Mock AI responses deterministically.
 - Bug fixes must include a regression test when practical.
 
+## API Testing Rules
+
+Whenever an HTTP endpoint is added, modified or removed:
+
+- Update the official API collection located under `postman/`.
+- Keep the collection synchronized with the current API behavior.
+- Organize requests using the existing folder structure.
+- Include realistic request examples.
+- Store reusable values using collection or environment variables when appropriate.
+- Add validation scripts for:
+  - HTTP status codes;
+  - response schema where applicable;
+  - critical business rules.
+- Remove obsolete requests.
+- Do not leave duplicated requests.
+- Ensure the collection can be executed sequentially for smoke testing.
+
+API collections are considered part of the project's documentation and Definition of Done.
+
 ## Commands
 
 Before completing a task, run the commands relevant to the changed area:
@@ -195,3 +215,6 @@ A task is considered complete only if:
 - pnpm build passes.
 - Documentation is updated if needed.
 - Existing functionality was not broken.
+- If the task introduces or changes HTTP endpoints:
+  - Update the official API collection.
+  - Verify the affected requests manually or through the collection runner.

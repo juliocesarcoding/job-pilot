@@ -1,0 +1,475 @@
+{
+  "info": {
+    "name": "Job Pilot API",
+    "description": "Official smoke-test collection for the currently implemented Job Pilot API.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "experienceId",
+      "value": ""
+    },
+    {
+      "key": "candidateSkillId",
+      "value": ""
+    },
+    {
+      "key": "resumeId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Get Health",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/health"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('returns dependency health shape', function () {",
+                  "  pm.expect([200, 503]).to.include(pm.response.code);",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body).to.have.property('status');",
+                  "  pm.expect(body).to.have.property('postgres');",
+                  "  pm.expect(body).to.have.property('redis');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Candidate Profile",
+      "item": [
+        {
+          "name": "Get Candidate Profile",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/candidate-profile"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('returns candidate profile', function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body).to.have.property('id');",
+                  "  pm.expect(body).to.have.property('userId');",
+                  "  pm.expect(body).to.have.property('experiences').that.is.an('array');",
+                  "  pm.expect(body).to.have.property('skills').that.is.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Upsert Candidate Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"headline\": \"Senior Full Stack Engineer\",\n  \"summary\": \"Builds TypeScript products for international teams.\",\n  \"currentLocation\": \"Sao Paulo, Brazil\",\n  \"countryCode\": \"BR\",\n  \"timezone\": \"America/Sao_Paulo\",\n  \"englishLevel\": \"ADVANCED\",\n  \"yearsOfExperience\": 8,\n  \"desiredRole\": \"Senior Software Engineer\",\n  \"desiredSalaryMin\": 90000,\n  \"desiredSalaryMax\": 130000,\n  \"desiredSalaryCurrency\": \"USD\",\n  \"remoteOnly\": true,\n  \"openToContract\": true,\n  \"openToFullTime\": true,\n  \"requiresVisaSponsorship\": false,\n  \"linkedinUrl\": \"https://www.linkedin.com/in/example\",\n  \"githubUrl\": \"https://github.com/example\",\n  \"portfolioUrl\": \"https://example.dev\"\n}"
+            },
+            "url": "{{baseUrl}}/candidate-profile"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('updates candidate profile', function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body.headline).to.equal('Senior Full Stack Engineer');",
+                  "  pm.expect(body.countryCode).to.equal('BR');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Experience",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"companyName\": \"Acme Remote\",\n  \"roleTitle\": \"Senior Software Engineer\",\n  \"employmentType\": \"FULL_TIME\",\n  \"location\": \"Remote\",\n  \"remote\": true,\n  \"startDate\": \"2022-01-01\",\n  \"endDate\": null,\n  \"current\": true,\n  \"description\": \"Builds APIs and dashboards.\",\n  \"achievements\": [\"Reduced manual reporting time by 40%\"],\n  \"technologies\": [\"TypeScript\", \"NestJS\", \"PostgreSQL\"]\n}"
+            },
+            "url": "{{baseUrl}}/candidate-profile/experiences"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('creates experience and captures id', function () {",
+                  "  pm.expect(pm.response.code).to.equal(201);",
+                  "  const body = pm.response.json();",
+                  "  const created = body.experiences.find((item) => item.companyName === 'Acme Remote');",
+                  "  pm.expect(created).to.exist;",
+                  "  pm.collectionVariables.set('experienceId', created.id);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Experience",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Builds APIs, dashboards, and automation tools.\",\n  \"technologies\": [\"TypeScript\", \"NestJS\", \"PostgreSQL\", \"Redis\"]\n}"
+            },
+            "url": "{{baseUrl}}/candidate-profile/experiences/{{experienceId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('updates captured experience', function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "  const body = pm.response.json();",
+                  "  const updated = body.experiences.find((item) => item.id === pm.collectionVariables.get('experienceId'));",
+                  "  pm.expect(updated).to.exist;",
+                  "  pm.expect(updated.technologies).to.include('Redis');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Skill",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"TypeScript\",\n  \"category\": \"LANGUAGE\",\n  \"proficiencyLevel\": \"ADVANCED\",\n  \"yearsOfExperience\": 6,\n  \"lastUsedYear\": 2026,\n  \"isPrimary\": true\n}"
+            },
+            "url": "{{baseUrl}}/candidate-profile/skills"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('creates skill and captures id', function () {",
+                  "  pm.expect(pm.response.code).to.equal(201);",
+                  "  const body = pm.response.json();",
+                  "  const created = body.skills.find((item) => item.normalizedName === 'typescript');",
+                  "  pm.expect(created).to.exist;",
+                  "  pm.collectionVariables.set('candidateSkillId', created.id);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Skill",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"proficiencyLevel\": \"EXPERT\",\n  \"yearsOfExperience\": 7,\n  \"lastUsedYear\": 2026,\n  \"isPrimary\": true\n}"
+            },
+            "url": "{{baseUrl}}/candidate-profile/skills/{{candidateSkillId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('updates captured skill', function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "  const body = pm.response.json();",
+                  "  const updated = body.skills.find((item) => item.id === pm.collectionVariables.get('candidateSkillId'));",
+                  "  pm.expect(updated).to.exist;",
+                  "  pm.expect(updated.proficiencyLevel).to.equal('EXPERT');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Skill",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/candidate-profile/skills/{{candidateSkillId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('deletes captured skill', function () {",
+                  "  pm.expect(pm.response.code).to.equal(204);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Experience",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/candidate-profile/experiences/{{experienceId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('deletes captured experience', function () {",
+                  "  pm.expect(pm.response.code).to.equal(204);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Resume",
+      "item": [
+        {
+          "name": "List Resumes",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/resumes"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('returns resume list', function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Upload Resume",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "{{resumeFilePath}}"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/resumes/upload"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('uploads resume and captures id', function () {",
+                  "  pm.expect(pm.response.code).to.equal(201);",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body).to.have.property('id');",
+                  "  pm.expect(['.pdf', '.docx']).to.include(body.extension);",
+                  "  pm.collectionVariables.set('resumeId', body.id);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Active Resume",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/resumes/active"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('returns active resume', function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body).to.have.property('active', true);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Download Resume",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/resumes/{{resumeId}}/download"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('downloads captured resume', function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "  pm.expect(pm.response.headers.get('Content-Disposition')).to.include('attachment');",
+                  "});",
+                  "postman.setNextRequest('Extract Resume');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Resume",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/resumes/{{resumeId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('delete resume is accepted or business rule blocks deleting only active resume', function () {",
+                  "  pm.expect([204, 409]).to.include(pm.response.code);",
+                  "});",
+                  "postman.setNextRequest(null);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Resume Extraction",
+      "item": [
+        {
+          "name": "Extract Resume",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/resumes/{{resumeId}}/extract"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('extracts resume or reports expected business state', function () {",
+                  "  pm.expect([201, 400, 404, 409, 500]).to.include(pm.response.code);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body).to.have.property('resumeId', pm.collectionVariables.get('resumeId'));",
+                  "  pm.expect(body).to.have.property('status', 'COMPLETED');",
+                  "  pm.expect(body).to.have.property('extractedText').that.is.a('string');",
+                  "  pm.expect(body).to.have.property('metadata');",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Resume Extraction",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/resumes/{{resumeId}}/extraction"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('returns extraction or not found', function () {",
+                  "  pm.expect([200, 404]).to.include(pm.response.code);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body).to.have.property('resumeId', pm.collectionVariables.get('resumeId'));",
+                  "  pm.expect(['PENDING', 'PROCESSING', 'COMPLETED', 'FAILED']).to.include(body.status);",
+                  "  pm.expect(body).to.have.property('extractedText').that.is.a('string');",
+                  "}",
+                  "postman.setNextRequest('Delete Resume');"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

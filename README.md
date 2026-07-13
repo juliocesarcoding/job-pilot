@@ -78,6 +78,61 @@ The API listens on `http://localhost:3001` by default. Candidate profile routes 
 - `PUT /api/candidate-profile/skills/:candidateSkillId`
 - `DELETE /api/candidate-profile/skills/:candidateSkillId`
 
+## Resume Upload API
+
+JP-012 supports local resume upload infrastructure. JP-013 adds deterministic text extraction for stored PDF and DOCX resumes without AI analysis or candidate profile synchronization.
+
+Environment variables:
+
+```bash
+RESUME_STORAGE_PROVIDER=LOCAL
+RESUME_STORAGE_PATH=storage/resumes
+```
+
+Files are stored at `storage/resumes/<candidateProfileId>/<generated-file-name>`. The storage directory is created automatically. Local files under `storage/` are ignored by git.
+
+Supported formats:
+
+- PDF: `application/pdf`, `.pdf`
+- DOCX: `application/vnd.openxmlformats-officedocument.wordprocessingml.document`, `.docx`
+
+Upload limit: 10 MB. Empty files, unknown MIME types, mismatched extensions, TXT, DOC, ZIP, images, and executables are rejected.
+
+Resume endpoints:
+
+- `GET /api/resumes`
+- `GET /api/resumes/active`
+- `GET /api/resumes/:id/download`
+- `POST /api/resumes/upload` with multipart field `file`
+- `DELETE /api/resumes/:id`
+
+Uploading a resume creates version `1` when no resume exists. Each later upload increments the latest version, deactivates the previous active resume, and activates the new resume. Soft deletion never removes the physical file. If the active resume is deleted and another version exists, the latest previous version is activated. The only active resume cannot be deleted.
+
+## Resume Extraction API
+
+Resume extraction reads the file already stored by the resume upload API. It does not duplicate files, perform OCR, call AI providers, infer skills, infer work history, infer education, or update `CandidateProfile`.
+
+Supported extraction formats:
+
+- PDF resumes through `pdf-parse`
+- DOCX resumes through `mammoth`
+
+Extraction metadata includes word count, detected language when basic evidence is available (`en`, `pt`, or `es`), extraction duration in milliseconds, parser name, format, and PDF page count when applicable. DOCX page count is stored as `null` because DOCX files do not have stable pages until rendered.
+
+Extraction statuses:
+
+- `PENDING`
+- `PROCESSING`
+- `COMPLETED`
+- `FAILED`
+
+Extraction endpoints:
+
+- `POST /api/resumes/:resumeId/extract`
+- `GET /api/resumes/:resumeId/extraction`
+
+`POST /api/resumes/:resumeId/extract` validates ownership, rejects unsupported stored formats with `400`, returns `404` when the resume does not belong to the current development user, returns `409` when an extraction already exists, and stores `FAILED` without exposing internal parser or storage exceptions when extraction fails.
+
 ## Running individual services
 
 Run these commands from the repository root:
@@ -102,4 +157,4 @@ The web app listens on `http://localhost:3000` by default and exposes `GET /api/
 
 ## Notes
 
-Phase 1A implements the candidate profile foundation only. Frontend profile screens, authentication, resume upload, AI, jobs, job matching, and application automation are not implemented yet.
+Phase 1A implements the candidate profile foundation and JP-012 implements resume upload infrastructure. Frontend profile screens, authentication, resume parsing, AI, jobs, job matching, and application automation are not implemented yet.

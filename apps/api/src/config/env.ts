@@ -40,6 +40,8 @@ const apiEnvSchema = z.object({
   DATABASE_URL: urlWithProtocol('DATABASE_URL', ['postgresql://', 'postgres://']),
   REDIS_URL: urlWithProtocol('REDIS_URL', ['redis://', 'rediss://']),
   JOBPILOT_DEV_USER_EMAIL: z.string().email().default('julio.dev@jobpilot.local'),
+  RESUME_STORAGE_PROVIDER: z.literal('LOCAL').default('LOCAL'),
+  RESUME_STORAGE_PATH: z.string().trim().min(1, 'RESUME_STORAGE_PATH is required').default('storage/resumes'),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
 });
 
