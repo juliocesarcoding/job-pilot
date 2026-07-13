@@ -70,6 +70,29 @@ export interface ResumeExtractionResponse {
   updatedAt: string;
 }
 
+export const analysisStatuses = ['PENDING', 'PROCESSING', 'COMPLETED', 'FAILED'] as const;
+
+export type AnalysisStatusName = (typeof analysisStatuses)[number];
+
+export interface ResumeAnalysisResponse {
+  id: string;
+  resumeExtractionId: string;
+  status: AnalysisStatusName;
+  provider: string;
+  model: string;
+  promptVersion: string;
+  analysis: unknown;
+  confidence: number | null;
+  inputTokens: number | null;
+  outputTokens: number | null;
+  totalTokens: number | null;
+  startedAt: string;
+  finishedAt: string | null;
+  errorMessage: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export function validateResumeUploadFile(file: ResumeUploadFile | undefined): ResumeValidationResult {
   if (!file) {
     throw new Error('Resume file is required');

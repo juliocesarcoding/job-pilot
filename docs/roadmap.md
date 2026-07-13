@@ -26,6 +26,15 @@
 - Store word count, basic detected language, PDF page count, extraction duration, and parser metadata.
 - Expose extraction and retrieval endpoints without AI analysis or candidate profile synchronization.
 
+## JP-014 — Resume AI Analysis
+
+- Add one-to-one resume analysis persistence linked to completed resume extractions.
+- Analyze extracted resume text through an interchangeable AI provider abstraction.
+- Implement an OpenAI provider with prompt version `1.0.0`.
+- Validate structured JSON analysis with Zod before persistence.
+- Store provider, model, prompt version, confidence, token usage, status, and sanitized errors.
+- Expose analysis and retrieval endpoints without candidate profile synchronization.
+
 ## Future phases
 
 - Job collection and normalization.

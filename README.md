@@ -80,13 +80,15 @@ The API listens on `http://localhost:3001` by default. Candidate profile routes 
 
 ## Resume Upload API
 
-JP-012 supports local resume upload infrastructure. JP-013 adds deterministic text extraction for stored PDF and DOCX resumes without AI analysis or candidate profile synchronization.
+JP-012 supports local resume upload infrastructure. JP-013 adds deterministic text extraction for stored PDF and DOCX resumes. JP-014 adds structured AI analysis of completed extractions without candidate profile synchronization.
 
 Environment variables:
 
 ```bash
 RESUME_STORAGE_PROVIDER=LOCAL
 RESUME_STORAGE_PATH=storage/resumes
+OPENAI_API_KEY=replace-me
+OPENAI_MODEL=gpt-4.1-mini
 ```
 
 Files are stored at `storage/resumes/<candidateProfileId>/<generated-file-name>`. The storage directory is created automatically. Local files under `storage/` are ignored by git.
@@ -133,6 +135,29 @@ Extraction endpoints:
 
 `POST /api/resumes/:resumeId/extract` validates ownership, rejects unsupported stored formats with `400`, returns `404` when the resume does not belong to the current development user, returns `409` when an extraction already exists, and stores `FAILED` without exposing internal parser or storage exceptions when extraction fails.
 
+## Resume Analysis API
+
+Resume analysis runs after resume extraction:
+
+```text
+Resume -> ResumeExtraction -> ResumeAnalysis
+```
+
+The analysis provider is accessed through the `ResumeAnalysisProvider` interface. The current implementation is `OpenAIResumeAnalysisProvider`, configured by `OPENAI_API_KEY` and `OPENAI_MODEL`. Controllers and services do not call OpenAI directly.
+
+Prompt version:
+
+- `1.0.0`
+
+The provider must return structured JSON. The API validates the response with Zod before storing it. If validation fails, the analysis is stored as `FAILED` and the endpoint returns `422`. Provider failures are stored as `FAILED` and return `500`.
+
+Analysis endpoints:
+
+- `POST /api/resumes/:resumeId/analyze`
+- `GET /api/resumes/:resumeId/analysis`
+
+Analysis never updates `CandidateProfile`, `Experience`, `Skill`, or `CandidateSkill`. It only persists a `ResumeAnalysis` proposal linked to the completed `ResumeExtraction`.
+
 ## Running individual services
 
 Run these commands from the repository root:
@@ -157,4 +182,4 @@ The web app listens on `http://localhost:3000` by default and exposes `GET /api/
 
 ## Notes
 
-Phase 1A implements the candidate profile foundation and JP-012 implements resume upload infrastructure. Frontend profile screens, authentication, resume parsing, AI, jobs, job matching, and application automation are not implemented yet.
+Phase 1A implements the candidate profile foundation. JP-012 implements resume upload infrastructure, JP-013 implements resume text extraction, and JP-014 implements structured resume AI analysis. Frontend profile screens, authentication, candidate profile synchronization, jobs, job matching, and application automation are not implemented yet.

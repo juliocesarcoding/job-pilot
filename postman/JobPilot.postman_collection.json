@@ -463,6 +463,66 @@
                   "  pm.expect(['PENDING', 'PROCESSING', 'COMPLETED', 'FAILED']).to.include(body.status);",
                   "  pm.expect(body).to.have.property('extractedText').that.is.a('string');",
                   "}",
+                  "postman.setNextRequest('Analyze Resume');"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Resume Analysis",
+      "item": [
+        {
+          "name": "Analyze Resume",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/resumes/{{resumeId}}/analyze"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('analyzes resume or reports expected business state', function () {",
+                  "  pm.expect([201, 404, 409, 422, 500]).to.include(pm.response.code);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body).to.have.property('status', 'COMPLETED');",
+                  "  pm.expect(body).to.have.property('provider');",
+                  "  pm.expect(body).to.have.property('model');",
+                  "  pm.expect(body).to.have.property('promptVersion', '1.0.0');",
+                  "  pm.expect(body).to.have.property('analysis');",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Resume Analysis",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/resumes/{{resumeId}}/analysis"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('returns analysis or not found', function () {",
+                  "  pm.expect([200, 404]).to.include(pm.response.code);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(['PENDING', 'PROCESSING', 'COMPLETED', 'FAILED']).to.include(body.status);",
+                  "  pm.expect(body).to.have.property('provider');",
+                  "  pm.expect(body).to.have.property('analysis');",
+                  "}",
                   "postman.setNextRequest('Delete Resume');"
                 ]
               }

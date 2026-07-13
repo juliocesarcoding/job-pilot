@@ -42,7 +42,29 @@ const apiEnvSchema = z.object({
   JOBPILOT_DEV_USER_EMAIL: z.string().email().default('julio.dev@jobpilot.local'),
   RESUME_STORAGE_PROVIDER: z.literal('LOCAL').default('LOCAL'),
   RESUME_STORAGE_PATH: z.string().trim().min(1, 'RESUME_STORAGE_PATH is required').default('storage/resumes'),
+  OPENAI_API_KEY: z.string().trim().optional(),
+  OPENAI_MODEL: z.string().trim().optional(),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+}).superRefine((value, context) => {
+  if (value.NODE_ENV === 'test') {
+    return;
+  }
+
+  if (!value.OPENAI_API_KEY) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['OPENAI_API_KEY'],
+      message: 'OPENAI_API_KEY is required',
+    });
+  }
+
+  if (!value.OPENAI_MODEL) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['OPENAI_MODEL'],
+      message: 'OPENAI_MODEL is required',
+    });
+  }
 });
 
 export type ApiEnv = z.infer<typeof apiEnvSchema>;

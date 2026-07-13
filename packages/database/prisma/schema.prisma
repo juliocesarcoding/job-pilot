@@ -146,6 +146,27 @@ model ResumeExtraction {
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
   resume           Resume           @relation(fields: [resumeId], references: [id])
+  analysis         ResumeAnalysis?
+}
+
+model ResumeAnalysis {
+  id                 String         @id @default(uuid())
+  resumeExtractionId String         @unique
+  status             AnalysisStatus
+  provider           String
+  model              String
+  promptVersion      String
+  analysis           Json
+  confidence         Decimal?
+  inputTokens        Int?
+  outputTokens       Int?
+  totalTokens        Int?
+  startedAt          DateTime
+  finishedAt         DateTime?
+  errorMessage       String?        @db.Text
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  resumeExtraction   ResumeExtraction @relation(fields: [resumeExtractionId], references: [id])
 }
 
 enum EnglishLevel {
@@ -192,6 +213,13 @@ enum StorageProvider {
 }
 
 enum ExtractionStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum AnalysisStatus {
   PENDING
   PROCESSING
   COMPLETED

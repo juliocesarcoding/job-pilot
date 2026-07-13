@@ -6,6 +6,8 @@ describe('loadApiEnv', () => {
     const env = loadApiEnv({
       DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/jobpilot',
       REDIS_URL: 'redis://localhost:6379',
+      OPENAI_API_KEY: 'test-key',
+      OPENAI_MODEL: 'test-model',
       NODE_ENV: 'development',
     });
 
@@ -20,9 +22,12 @@ describe('loadApiEnv', () => {
         DATABASE_URL: '',
         REDIS_URL: 'not-a-url',
         PORT: '70000',
+        OPENAI_API_KEY: '',
+        OPENAI_MODEL: '',
+        NODE_ENV: 'development',
       }),
     ).toThrow(
-      'Invalid API environment: PORT must be between 1 and 65535; DATABASE_URL is required; REDIS_URL must be a valid URL',
+      'Invalid API environment: PORT must be between 1 and 65535; DATABASE_URL is required; REDIS_URL must be a valid URL; OPENAI_API_KEY is required; OPENAI_MODEL is required',
     );
   });
 });

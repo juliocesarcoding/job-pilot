@@ -33,6 +33,7 @@ pnpm --filter @job-pilot/database db:seed
 - `CandidateSkill`: candidate-to-skill relationship with proficiency metadata and a unique `candidateProfileId + skillId` constraint.
 - `Resume`: versioned resume file metadata owned by a candidate profile. Resume files are stored through a storage provider.
 - `ResumeExtraction`: one-to-one structured text extraction result for a resume. It stores extraction status, raw extracted text, detected language, page count, word count, and parser metadata. It does not update `CandidateProfile`.
+- `ResumeAnalysis`: one-to-one structured AI analysis result for a completed resume extraction. It stores provider/model metadata, prompt version, token usage, confidence when available, status, errors, and the validated JSON analysis. It does not update candidate profile entities.
 
 ## Resume Storage
 
@@ -89,6 +90,54 @@ Extraction endpoints:
 - `GET /api/resumes/:resumeId/extraction`
 
 Extraction failures store a `FAILED` record with sanitized metadata and no partial extracted text.
+
+## Resume Analysis
+
+JP-014 adds structured AI analysis after extraction:
+
+```text
+Resume -> ResumeExtraction -> ResumeAnalysis
+```
+
+`ResumeAnalysis` can only be created when the linked `ResumeExtraction` is `COMPLETED`. The current provider implementation is OpenAI behind the `ResumeAnalysisProvider` interface, so future providers can be swapped without changing controllers or use-case services.
+
+`AnalysisStatus` values:
+
+- `PENDING`
+- `PROCESSING`
+- `COMPLETED`
+- `FAILED`
+
+Stored analysis metadata includes:
+
+- provider
+- model
+- prompt version
+- validated analysis JSON
+- confidence when returned by the provider
+- input, output, and total token usage when available
+- started and finished timestamps
+- sanitized failure message when failed
+
+Prompt version:
+
+- `1.0.0`
+
+The analysis JSON is validated with Zod before persistence and contains:
+
+- summary
+- skills
+- experience
+- education
+- languages
+- certifications
+
+Analysis endpoints:
+
+- `POST /api/resumes/:resumeId/analyze`
+- `GET /api/resumes/:resumeId/analysis`
+
+The AI analysis is a proposal only. It never updates `CandidateProfile`, `Experience`, `Skill`, or `CandidateSkill`.
 
 ## Temporary Development User
 

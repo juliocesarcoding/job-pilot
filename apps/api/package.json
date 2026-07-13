@@ -11,6 +11,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@job-pilot/ai": "workspace:*",
     "@job-pilot/database": "workspace:*",
     "@job-pilot/shared": "workspace:*",
     "@nestjs/common": "^10.4.5",
