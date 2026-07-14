@@ -35,6 +35,22 @@
 - Store provider, model, prompt version, confidence, token usage, status, and sanitized errors.
 - Expose analysis and retrieval endpoints without candidate profile synchronization.
 
+## JP-015 — Candidate Profile and Resume Review UI
+
+- Add the first usable web workspace at `/profile`.
+- Support candidate profile, experience, and skill management through the existing API.
+- Support resume upload, version history, download, deletion, extraction, and AI analysis controls.
+- Display structured AI analysis results for review.
+- Keep AI analysis as a proposal only; it cannot be applied to the candidate profile yet.
+
+## JP-016 — Dashboard
+
+- Make `/` the default JobPilot Dashboard.
+- Add a persistent SaaS navigation shell with Dashboard, Jobs, Applications, AI Review, Profile, Resume, and Settings.
+- Summarize the current development user's next best action, attention items, and candidate readiness from existing API data.
+- Show documented placeholder states for Jobs and Applications without fake data.
+- Surface recent resume AI activity and recent progress without exposing provider payloads or raw JSON.
+
 ## Future phases
 
 - Job collection and normalization.

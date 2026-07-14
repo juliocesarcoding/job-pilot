@@ -89,6 +89,7 @@ RESUME_STORAGE_PROVIDER=LOCAL
 RESUME_STORAGE_PATH=storage/resumes
 OPENAI_API_KEY=replace-me
 OPENAI_MODEL=gpt-4.1-mini
+NEXT_PUBLIC_API_BASE_URL=http://localhost:3001/api
 ```
 
 Files are stored at `storage/resumes/<candidateProfileId>/<generated-file-name>`. The storage directory is created automatically. Local files under `storage/` are ignored by git.
@@ -180,6 +181,57 @@ pnpm --filter @job-pilot/worker start
 The API listens on `http://localhost:3001` by default and exposes `GET /api/health`.
 The web app listens on `http://localhost:3000` by default and exposes `GET /api/health`.
 
+## Dashboard
+
+JP-016 makes the Dashboard the application home:
+
+- `http://localhost:3000/`
+
+The Dashboard is the job-search command center for the current development user. It consumes the existing API and summarizes:
+
+- the next best action;
+- candidate readiness;
+- actionable attention items;
+- recommended jobs placeholder state until job discovery exists;
+- applications placeholder state until application tracking exists;
+- recent AI activity from resume analysis;
+- recent profile, resume, extraction, and analysis progress.
+
+Jobs and Applications are intentionally not implemented yet and do not display fake data.
+
+## Profile workspace UI
+
+JP-015 adds the first usable web workflow at:
+
+- `http://localhost:3000/profile`
+
+Start the API and web app together from the repository root:
+
+```bash
+pnpm --filter @job-pilot/api dev
+pnpm --filter @job-pilot/web dev
+```
+
+The web app consumes the existing API configured by:
+
+```bash
+NEXT_PUBLIC_API_BASE_URL=http://localhost:3001/api
+```
+
+The `/profile` route supports:
+
+- editing the seeded development candidate profile;
+- creating, editing, and soft deleting experiences;
+- adding, editing, and deleting candidate skills;
+- uploading PDF and DOCX resumes;
+- viewing active and previous resume versions;
+- downloading and deleting resume versions according to API business rules;
+- running resume text extraction for the active resume;
+- running AI analysis after extraction completes;
+- reviewing the structured AI analysis result.
+
+Current limitation: AI analysis is review-only. It does not update `CandidateProfile`, experiences, skills, education, or any other profile data. Applying AI proposals belongs to a future phase.
+
 ## Notes
 
-Phase 1A implements the candidate profile foundation. JP-012 implements resume upload infrastructure, JP-013 implements resume text extraction, and JP-014 implements structured resume AI analysis. Frontend profile screens, authentication, candidate profile synchronization, jobs, job matching, and application automation are not implemented yet.
+Phase 1A implements the candidate profile foundation. JP-012 implements resume upload infrastructure, JP-013 implements resume text extraction, JP-014 implements structured resume AI analysis, and JP-015 implements the first `/profile` review workspace. Authentication, candidate profile synchronization, jobs, job matching, and application automation are not implemented yet.
